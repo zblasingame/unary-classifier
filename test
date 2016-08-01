@@ -1,0 +1,3 @@
+#!/bin/bash
+
+python2 main.py --plot_off --test_file $1

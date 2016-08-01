@@ -1,0 +1,14 @@
+#!/bin/bash
+
+touch results_hb.csv
+
+echo "testingSet, percentAccuracy" > results_hb1.csv
+
+for file in ../data/hb/*
+do
+	result=$(./test $file)
+	echo "$file,$result" >> results_hb1.csv
+	echo "$file,$result"
+done
+
+echo "All Done"

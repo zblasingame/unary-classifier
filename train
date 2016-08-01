@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo $1
+
+python2 main.py --train --testing_off --train_file $1
