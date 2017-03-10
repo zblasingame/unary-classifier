@@ -78,8 +78,9 @@ for path, dirs, files in os.walk(args.dir):
             print('Progress: {:03.2f}% for {}'.format(100*(test_num/max_tests),
                                                       args.dir))
             print('Accuracy: {:02.2f}%'.format(data['accuracy']))
-            print('-'*79)
+            print('\n\n')
             print(data)
+            print('-'*79)
 
             dataset_data.append(data)
 
