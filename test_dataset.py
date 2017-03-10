@@ -70,7 +70,7 @@ for path, dirs, files in os.walk(args.dir):
 
             data = ae.test(test)
             data['subset'] = subset_count + 1
-            data['combination'] = ','.join(entry)
+            data['combination'] = entry
 
             test_num += 1
 
@@ -78,7 +78,7 @@ for path, dirs, files in os.walk(args.dir):
             print('Progress: {:03.2f}% for {}'.format(100*(test_num/max_tests),
                                                       args.dir))
             print('Accuracy: {:02.2f}%'.format(data['accuracy']))
-            print('\n\n')
+            print()
             print(data)
             print('-'*79)
 
@@ -91,7 +91,7 @@ keys = [key for key in dataset_data[0] if key not in ignore_keys]
 
 # calculate averages for each combination
 for entry in hpc_combinations:
-    combination = ','.join(entry)
+    combination = entry
 
     data = {key: sum(entry[key] for entry in dataset_data
                      if entry['combination'] == combination)/num_subsets
@@ -114,9 +114,10 @@ with open('{}.csv'.format(args.out), 'w') as f:
                     'tp_rate,tn_rate,fp_rate,fn_rate'.split())
 
     for entry in dataset_data:
-        out_list = [entry['combination'], entry['subset'], entry['accuracy'],
-                    entry['tp_rate'], entry['tn_rate'],
-                    entry['fp_rate'], entry['fn_rate']]
+        out_list = entry['combination']
+        out_list.extend([entry['subset'], entry['accuracy'],
+                         entry['tp_rate'], entry['tn_rate'],
+                         entry['fp_rate'], entry['fn_rate']])
 
         out_list = [str(el) for el in out_list]
 
