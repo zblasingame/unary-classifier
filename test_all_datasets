@@ -2,7 +2,7 @@
 
 for d in $1*/
 do
-	dir=${d/.$/}
+	dir=$(echo "$d" | sed 's/.$//')
 
 	optirun python test_dataset.py "$dir" "$dir/features.csv" "$dir/data"
 done

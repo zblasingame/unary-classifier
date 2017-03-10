@@ -44,11 +44,12 @@ dataset_stats = []
 with open(args.file, 'r') as f:
     dataset_stats = json.load(f)
 
-combinations = [entry['combination'] for entry in dataset_stats]
+combinations = [','.join(entry['combination']) for entry in dataset_stats]
 combinations = list(set(combinations))
 
 accuracies = [[entry['accuracy'] for entry in dataset_stats
-               if entry['combination'] == combination and entry['subset'] != 6]
+               if ','.join(entry['combination']) == combination and
+               entry['subset'] != 6]
               for combination in combinations]
 
 data = [go.Box(y=accuracies[i],

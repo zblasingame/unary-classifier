@@ -114,7 +114,7 @@ with open('{}.csv'.format(args.out), 'w') as f:
                     'tp_rate,tn_rate,fp_rate,fn_rate'.split())
 
     for entry in dataset_data:
-        out_list = entry['combination']
+        out_list = list(entry['combination'])
         out_list.extend([entry['subset'], entry['accuracy'],
                          entry['tp_rate'], entry['tn_rate'],
                          entry['fp_rate'], entry['fn_rate']])
