@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for d in $1*/
+do
+	dir=${d/.$/}
+
+	optirun python test_dataset.py "$dir" "$dir/features.csv" "$dir/data"
+done
