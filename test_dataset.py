@@ -36,11 +36,25 @@ with open(args.features, 'r') as f:
     for row in reader:
         features = row
 
+num_input = 4
 hpc_combinations = list(itertools.combinations(features, 4))
+
+ae = classifier.Classifier(num_input, batch_size=100, num_epochs=30,
+                           normalize=True)
 
 dataset_data = []
 
+# find number of subsets
 num_subsets = 0
+for path, dirs, files in os.walk(args.dir):
+    if 'subset' in path:
+        num_subsets += 1
+
+subset_count = 0
+
+# display stats
+test_num = 0
+max_tests = len(hpc_combinations) * num_subsets
 
 # Iterate through each subloop
 for path, dirs, files in os.walk(args.dir):
@@ -50,25 +64,26 @@ for path, dirs, files in os.walk(args.dir):
 
         # Iterate through each combinations of HPCs
         for i, entry in enumerate(hpc_combinations):
-            X, Y = classifier.grab_data(train, whitelist=entry)
-
-            num_input = len(X[0])
-
-            ae = classifier.Classifier(num_input, batch_size=100,
-                                       num_epochs=35, whitelist=entry)
-
-            # train and test neural net
-            ae.train(train)
+            # reset neural net and train
+            ae.whitelist = entry
+            ae.train(train, reset_weights=True)
 
             data = ae.test(test)
-            data['subset'] = num_subsets+1
+            data['subset'] = subset_count + 1
             data['combination'] = ','.join(entry)
 
+            test_num += 1
+
+            # status info
+            print('Progress: {:03.2f}% for {}'.format(100*(test_num/max_tests),
+                                                      args.dir))
+            print('Accuracy: {:02.2f}%'.format(data['accuracy']))
+            print('-'*79)
             print(data)
 
             dataset_data.append(data)
 
-        num_subsets += 1
+        subset_count += 1
 
 ignore_keys = ['subset', 'combination']
 keys = [key for key in dataset_data[0] if key not in ignore_keys]
@@ -77,9 +92,9 @@ keys = [key for key in dataset_data[0] if key not in ignore_keys]
 for entry in hpc_combinations:
     combination = ','.join(entry)
 
-    ae_data = {key: sum(entry[key] for entry in dataset_data
-                        if entry['combination'] == combination)/num_subsets
-               for key in keys}
+    data = {key: sum(entry[key] for entry in dataset_data
+                     if entry['combination'] == combination)/num_subsets
+            for key in keys}
 
     data['subset'] = 6
     data['combination'] = combination
@@ -95,7 +110,7 @@ with open('{}.json'.format(args.out), 'w') as f:
 with open('{}.csv'.format(args.out), 'w') as f:
     writer = csv.writer(f)
     writer.writerow('hpc1,hpc2,hpc3,hpc4,subset,accuracy,'
-                    'tp_rate,tn_rate,fp_rate,fn_rate')
+                    'tp_rate,tn_rate,fp_rate,fn_rate'.split())
 
     for entry in dataset_data:
         out_list = [entry['combination'], entry['subset'], entry['accuracy'],

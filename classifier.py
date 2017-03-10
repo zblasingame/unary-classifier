@@ -87,13 +87,15 @@ class Classifier:
 
         # for gpu
         self.config = tf.ConfigProto(log_device_placement=False)
+        self.config.gpu_options.allow_growth = True
 
-    def train(self, train_file=''):
+    def train(self, train_file='', reset_weights=False):
         """Trains classifier
 
         Args:
-            train_file (str): Training file location csv formatted,
+            train_file (str = ''): Training file location csv formatted,
                 must consist of only regular behavior
+            reset_weights (bool = False): Flag to reset weights
         """
 
         trX, trY = grab_data(train_file, self.blacklist, self.whitelist)
@@ -111,6 +113,9 @@ class Classifier:
 
         with tf.Session(config=self.config) as sess:
             sess.run(self.init_op)
+
+            if reset_weights:
+                sess.run(self.neural_net.reset_weights())
 
             costs = []
 
@@ -162,7 +167,7 @@ class Classifier:
         """Tests classifier
 
         Args:
-            test_file (str): Testing file location csv formatted
+            test_file (str = ''): Testing file location csv formatted
 
         Returns:
             (dict): Dictionary containing the following fields
@@ -249,7 +254,12 @@ def normalize(data, _min, _max):
         (np.ndarray): Normalized features of the same shape as data
     """
 
-    return (data - _min) / (_max - _min)
+    new_data = (data - _min) / (_max - _min)
+
+    # check if feature is constant, will be nan in new_data
+    np.place(new_data, np.isnan(new_data), 1)
+
+    return new_data
 
 
 def grab_data(filename, blacklist=[], whitelist=[]):

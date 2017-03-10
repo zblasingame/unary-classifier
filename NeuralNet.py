@@ -24,7 +24,7 @@ class NeuralNet:
     """
 
     def __init__(self, sizes, activations):
-        """Inits NeuralNet class"""
+        """Initializes NeuralNet class"""
         assert len(sizes) == len(activations) + 1, (
             'sizes and activations have a missmatched number of elements'
         )
@@ -67,6 +67,20 @@ class NeuralNet:
 
         return prev_value
 
+    def reset_weights(self):
+        """Resets TensorFlow weights so the model can be used again
+
+        Returns:
+            (list of tf.Operation) List of operations to reassign weights,
+                run using Session.run()
+        """
+
+        weights = [entry['weights'] for entry in self.network]
+        weights.extend([entry['biases'] for entry in self.network])
+
+        return [weight.assign(tf.random_normal(weight.get_shape(), stddev=0.1))
+                for weight in weights]
+
     def get_l2_loss(self):
         """Method to return the L2 loss for L2 regularization techniques
 
@@ -76,6 +90,6 @@ class NeuralNet:
         """
 
         weights = [entry['weights'] for entry in self.network]
-        weights += [entry['biases'] for entry in self.network]
+        weights.extend([entry['biases'] for entry in self.network])
 
         return reduce(lambda a, b: a + tf.nn.l2_loss(b), weights, 0)
